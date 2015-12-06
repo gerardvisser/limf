@@ -23,21 +23,20 @@
 struct integerTestsStruct {
   void (* testSet)(void);
   void (* testSet2)(void);
+  void (* testBsf)(void);
+  void (* testBsr)(void);
+  void (* testClear)(void);
+  void (* testToInt)(void);
   /*
   void (* testAbsAdd)(void);
   void (* testAbsDec)(void);
   void (* testAbsInc)(void);
   void (* testAbsSub)(void);
-  void (* testBsf)(void);
-  void (* testBsr)(void);
-  void (* testClear)(void);
   void (* testGetBit)(void);
   void (* testLshl)(void);
   void (* testRcl)(void);
   void (* testShl)(void);
   void (* testShr)(void);
-  void (* testSign)(void);
-  void (* testToInt)(void);
   */
 };
 
