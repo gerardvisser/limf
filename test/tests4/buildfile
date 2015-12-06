@@ -1,0 +1,8 @@
+-x runAll.elf
+-L ../../lib
+-l limf
+-I ../../include
+-I ../../src
+-I ../testutils
+../testutils
+.
