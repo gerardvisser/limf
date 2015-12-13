@@ -201,6 +201,32 @@ static void testClear (void) {
 
 static void testGetBit (void) {
   ___BTPUSH;
+
+  int i;
+  const int max = 0x10000;
+  Integer* bigint = new Integer (15);
+  ErrorExamples* errorExamples = new ErrorExamples ("Error for: 0x%015lX, bitNo: %d\n", 2);
+  progressionBar_init ("Integer::getBit", max);
+  for (i = 0; i < max; ++i) {
+    int bitNo = rand () % 60;
+    int64_t mask = 1L << bitNo;
+    int64_t val = randomBits (60);
+    bigint->set (val);
+
+    bool expected = (val & mask) != 0;
+    bool actual = bigint->getBit (bitNo);
+
+    bool error = actual != expected;
+    if (error) {
+      errorExamples->add (val, (int64_t) bitNo);
+    }
+    progressionBar_update (error);
+  }
+  errorExamples->print ();
+
+  delete errorExamples;
+  delete bigint;
+
   ___BTPOP;
 }
 
@@ -275,8 +301,35 @@ static void testSet2 (void) {
   ___BTPOP;
 }
 
+/* TODO: Wat als aantal te verschuiven bits veel groter is dan aantal bits van het getal zelf?  */
 static void testShl (void) {
   ___BTPUSH;
+
+  int i;
+  const int max = 0x200000;
+  Integer* bigint = new Integer (7);
+  ErrorExamples* errorExamples = new ErrorExamples ("Error for: 0x%07lX, bits to shift: %d\n", 2);
+  progressionBar_init ("Integer::shl", max);
+  for (i = 0; i < max; ++i) {
+    int x = rand () % 29;
+    int64_t val = randomBits (28);
+    bigint->set (val);
+
+    bigint->shl (x);
+    int64_t expected = val << x & 0xFFFFFFF;
+    int64_t actual = bigint->toInt ();
+
+    bool error = actual != expected;
+    if (error) {
+      errorExamples->add (val, (int64_t) x);
+    }
+    progressionBar_update (error);
+  }
+  errorExamples->print ();
+
+  delete errorExamples;
+  delete bigint;
+
   ___BTPOP;
 }
 
@@ -338,5 +391,7 @@ const struct integerTestsStruct integerTests = {
   testBsf,
   testBsr,
   testClear,
-  testToInt
+  testToInt,
+  testGetBit,
+  testShl
 };

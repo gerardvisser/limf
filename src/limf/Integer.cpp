@@ -126,16 +126,36 @@ void Integer::clear (void) {
 
 bool Integer::getBit (int bitNo) {
   ___CBTPUSH;
+  validation_validateInteger (this, VALIDATION_BEFORE);
+
+  int r = bitNo & CAL_R;
+  int q = bitNo >> CAL_Q;
+#ifdef DEBUG_MODE
+  if (q >= m_size) {
+    errors_printMessageAndExit ("Argument bitNo too large.");
+  }
+#endif
+  bool result = (m_buf[q] & CAL_SMASK[r]) != 0;
+
   ___CBTPOP;
+  return result;
 }
 
 void Integer::lshl (Integer* incomingBits, int x) {
   ___CBTPUSH;
+  validation_validateInteger (this, VALIDATION_BEFORE);
+  validation_validateInteger (incomingBits, VALIDATION_BEFORE);
+
+  validation_validateInteger (incomingBits, VALIDATION_AFTER);
+  validation_validateInteger (this, VALIDATION_AFTER);
   ___CBTPOP;
 }
 
 void Integer::rcl (bool carry) {
   ___CBTPUSH;
+  validation_validateInteger (this, VALIDATION_BEFORE);
+
+  validation_validateInteger (this, VALIDATION_AFTER);
   ___CBTPOP;
 }
 
@@ -204,11 +224,109 @@ void Integer::setMax (int fromIndex) {
 
 void Integer::shl (int x) {
   ___CBTPUSH;
+  validation_validateInteger (this, VALIDATION_BEFORE);
+
+  if (m_max > 0 & x > 0) {
+    const int n = m_size - 1;
+    const int q = x >> CAL_Q;
+    const int r = x & CAL_R;
+    int i, z;
+
+    if (r > 0) {
+
+      const int k = CAL_B - r;
+      if (m_max > n - q) {
+        z = n;
+      } else {
+        z = q + m_max;
+      }
+      for (i = z; i > q; --i) {
+        m_buf[i] = m_buf[i - q] << r;
+        m_buf[i] |= m_buf[i - q - 1] >> k;
+        m_buf[i] &= CAL_RMASK[CAL_B];
+      }
+      m_buf[q] = m_buf[0] << r;
+      m_buf[q] &= CAL_RMASK[CAL_B];
+      --i;
+
+    } else {
+
+      if (m_max > n - q) {
+        z = n;
+      } else {
+        z = q + m_max - 1;
+      }
+      for (i = z; i >= q; --i) {
+        m_buf[i] = m_buf[i - q];
+      }
+
+    }
+
+    while (i > -1) {
+      m_buf[i] = 0;
+      --i;
+    }
+    setMax (z);
+  }
+
+  validation_validateInteger (this, VALIDATION_AFTER);
   ___CBTPOP;
 }
 
 void Integer::shr (int x) {
   ___CBTPUSH;
+  validation_validateInteger (this, VALIDATION_BEFORE);
+
+  if (m_max > 0 & x > 0) {
+    const int oldMax = m_max;
+    const int q = x >> CAL_Q;
+    const int r = x & CAL_R;
+    int z = m_max - q;
+    int i;
+
+    if (z > 0) {
+
+      if (r > 0) {
+
+        --z;
+        const int k = CAL_B - r;
+        for (i = 0; i < z; ++i) {
+          m_buf[i] = m_buf[i + q] >> r;
+          m_buf[i] |= m_buf[i + q + 1] << k;
+          m_buf[i] &= CAL_RMASK[CAL_B];
+        }
+        m_buf[z] = m_buf[z + q] >> r;
+        if (m_buf[z] > 0) {
+          m_max = z + 1;
+        } else {
+          m_max = z;
+        }
+        ++i;
+
+      } else {
+
+        for (i = 0; i < z; ++i) {
+          m_buf[i] = m_buf[i + q];
+        }
+        m_max = z;
+
+      }
+      while (i < oldMax) {
+        m_buf[i] = 0;
+        ++i;
+      }
+
+    } else {
+
+      for (i = 0; i < oldMax; ++i) {
+        m_buf[i] = 0;
+      }
+      m_max = 0;
+
+    }
+  }
+
+  validation_validateInteger (this, VALIDATION_AFTER);
   ___CBTPOP;
 }
 

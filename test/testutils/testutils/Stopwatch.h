@@ -17,29 +17,23 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef INTEGER_TESTS_INCLUDED
-#define INTEGER_TESTS_INCLUDED
+#ifndef TESTUTILS__STOPWATCH_INCLUDED
+#define TESTUTILS__STOPWATCH_INCLUDED
 
-struct integerTestsStruct {
-  void (* testSet)(void);
-  void (* testSet2)(void);
-  void (* testBsf)(void);
-  void (* testBsr)(void);
-  void (* testClear)(void);
-  void (* testToInt)(void);
-  void (* testGetBit)(void);
-  void (* testShl)(void);
-  /*
-  void (* testAbsAdd)(void);
-  void (* testAbsDec)(void);
-  void (* testAbsInc)(void);
-  void (* testAbsSub)(void);
-  void (* testLshl)(void);
-  void (* testRcl)(void);
-  void (* testShr)(void);
-  */
+#include <stdint.h>
+
+class Stopwatch {
+private:
+  int64_t m_endTime;
+  int64_t m_startTime;
+
+public:
+  Stopwatch (void);
+  virtual ~Stopwatch (void);
+
+  void print (char* buf);
+  void start (void);
+  void stop (void);
 };
-
-extern const struct integerTestsStruct integerTests;
 
 #endif

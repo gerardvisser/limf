@@ -22,12 +22,14 @@
 #include <unistd.h>
 #include <limf/errors.h>
 #include "progressionBar.h"
+#include "Stopwatch.h"
 
 #define BAR_LENGTH 50
 
 static unsigned int errors;
 static unsigned int numberOfUpdates;
 static unsigned int total;
+static Stopwatch* stopwatch;
 
 static void progressionBar_drawBar (double frac);
 static void progressionBar_redrawBar (int signum);
@@ -59,9 +61,11 @@ void progressionBar_init (const char* nameOfTest, unsigned int numberOfSubtests)
   errors = 0;
   numberOfUpdates = 0;
   total = numberOfSubtests;
+  stopwatch = new Stopwatch ();
   printf ("Name: %s\n\n", nameOfTest);
   signal (SIGALRM, progressionBar_redrawBar);
   progressionBar_redrawBar (0);
+  stopwatch->start ();
 
   ___BTPOP;
 }
@@ -81,16 +85,21 @@ void progressionBar_update (bool subtestFailed) {
     ++errors;
   }
   if (numberOfUpdates == total) {
+    char time[64];
+    stopwatch->stop ();
     alarm (0);
+    stopwatch->print (time);
     progressionBar_drawBar (1.0);
-    printf ("Successful: %u (%.2f %%), Errors: %u (%.2f %%)\n",
+    printf ("Successful: %u (%.2f %%), Errors: %u (%.2f %%)\nTime: %s\n",
             total - errors,
             100.0 * (total - errors) / total,
             errors,
-            100.0 * errors / total);
+            100.0 * errors / total,
+            time);
     if (errors == 0) {
       printf ("\n");
     }
+    delete stopwatch;
   }
 
   ___BTPOP;

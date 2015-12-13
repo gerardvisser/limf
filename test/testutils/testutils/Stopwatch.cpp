@@ -17,29 +17,42 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef INTEGER_TESTS_INCLUDED
-#define INTEGER_TESTS_INCLUDED
+#include <stdio.h>
+#include <sys/time.h>
+#include <limf/errors.h>
+#include "Stopwatch.h"
 
-struct integerTestsStruct {
-  void (* testSet)(void);
-  void (* testSet2)(void);
-  void (* testBsf)(void);
-  void (* testBsr)(void);
-  void (* testClear)(void);
-  void (* testToInt)(void);
-  void (* testGetBit)(void);
-  void (* testShl)(void);
-  /*
-  void (* testAbsAdd)(void);
-  void (* testAbsDec)(void);
-  void (* testAbsInc)(void);
-  void (* testAbsSub)(void);
-  void (* testLshl)(void);
-  void (* testRcl)(void);
-  void (* testShr)(void);
-  */
-};
+___CLASS (Stopwatch)
 
-extern const struct integerTestsStruct integerTests;
+static int64_t timeOfDay (void) {
+  struct timeval x;
+  gettimeofday (&x, NULL);
+  return (int64_t) x.tv_sec * 100 + x.tv_usec / 10000;
+}
 
-#endif
+Stopwatch::Stopwatch (void) {
+}
+
+Stopwatch::~Stopwatch (void) {
+}
+
+void Stopwatch::print (char* buf) {
+  ___CBTPUSH;
+
+  int64_t diff = m_endTime - m_startTime;
+  int centis = diff % 100;
+  diff /= 100;
+  int seconds = diff % 60;
+  diff /= 60;
+  sprintf (buf, "%ld:%02d.%02d", diff, seconds, centis);
+
+  ___CBTPOP;
+}
+
+void Stopwatch::start (void) {
+  m_startTime = timeOfDay ();
+}
+
+void Stopwatch::stop (void) {
+  m_endTime = timeOfDay ();
+}
