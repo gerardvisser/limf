@@ -335,6 +335,32 @@ static void testShl (void) {
 
 static void testShr (void) {
   ___BTPUSH;
+
+  int i;
+  const int max = 0x200000;
+  Integer* bigint = new Integer (7);
+  ErrorExamples* errorExamples = new ErrorExamples ("Error for: 0x%07lX, bits to shift: %d\n", 2);
+  progressionBar_init ("Integer::shr", max);
+  for (i = 0; i < max; ++i) {
+    int x = rand () % 29;
+    int64_t val = randomBits (28);
+    bigint->set (val);
+
+    bigint->shr (x);
+    int64_t expected = val >> x;
+    int64_t actual = bigint->toInt ();
+
+    bool error = actual != expected;
+    if (error) {
+      errorExamples->add (val, (int64_t) x);
+    }
+    progressionBar_update (error);
+  }
+  errorExamples->print ();
+
+  delete errorExamples;
+  delete bigint;
+
   ___BTPOP;
 }
 
@@ -393,5 +419,6 @@ const struct integerTestsStruct integerTests = {
   testClear,
   testToInt,
   testGetBit,
-  testShl
+  testShl,
+  testShr
 };

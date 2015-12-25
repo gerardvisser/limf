@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+    <script src="script.js"></script>
+  </head>
+  <body onload="init ();">
+    <div id="container">
+      <div id="head">
+      </div>
+
+      <div id="index" class="inlineblock">
+        <b>Class Index</b>
+        <div class="link" onclick="display (this, 'Integer');">Integer</div>
+      </div>
+
+      <div id="body" class="inlineblock">
+      </div>
+    </div>
+
+    <div id="cache">
+
+      <div id="Integer" class="bodyContents">
+        <h2>Integer</h2>
+
+        <div class="funcdesc">
+          int <b>bsf</b> (void)
+          <div>
+            Bit scan forward. Returns the position of the least significant
+            bit set, or 0 if there are no bits set.<br>
+            Examples:<br>
+            if this integer has value 0, this function returns 0;<br>
+            if this integer has value 1, this function returns 0;<br>
+            if this integer has value 2, this function returns 1;<br>
+            if this integer has value 3, this function returns 0;<br>
+            if this integer has value 4, this function returns 2;<br>
+            if this integer has value 8, this function returns 3.<br>
+          </div>
+        </div>
+
+        <div class="funcdesc">
+          int <b>bsr</b> (void)
+          <div>
+            Bit scan reverse. Returns the position of the most significant bit
+            set plus one, or 0 if there are no bits set.<br>
+            Examples:<br>
+            if this integer has value 0, this function returns 0;<br>
+            if this integer has value 1, this function returns 1;<br>
+            if this integer has value 2, this function returns 2;<br>
+            if this integer has value 3, this function returns 2;<br>
+            if this integer has value 4, this function returns 3;<br>
+            if this integer has value 8, this function returns 4.<br>
+          </div>
+        </div>
+
+        <div class="funcdesc">
+          void <b>clear</b> (void)
+          <div>
+            Clears this integer, which means that its value will be zero.
+          </div>
+        </div>
+
+        <div class="funcdesc">
+          bool <b>getBit</b> (int <i>bitNo</i>)
+          <div>
+            Returns the value of the bit at the specified position. The least
+            significant bit resides at position 0.
+          </div>
+        </div>
+
+        <div class="funcdesc">
+          void <b>set</b> (Integer* <i>other</i>)
+          <div>
+            Makes this integer equal to the specified <i>other</i> one.
+          </div>
+        </div>
+
+        <div class="funcdesc">
+          void <b>set</b> (int64_t <i>val</i>)
+          <div>
+            Sets the value of this integer to <i>val</i>.
+          </div>
+        </div>
+
+        <div class="funcdesc">
+          void <b>shl</b> (int <i>x</i>)
+          <div>
+            Shift left. Shifts the bits of this integer <i>x</i> positions to the
+            left; to put it differently: multiplies this integer by 2<sup>x</sup>.
+          </div>
+        </div>
+
+        <div class="funcdesc">
+          void <b>shr</b> (int <i>x</i>)
+          <div>
+            Shift right. Shifts the bits of this integer x positions to the
+            right; to put it differently: divides this integer by 2<sup>x</sup>.
+          </div>
+        </div>
+
+        <div class="funcdesc">
+          bool <b>sign</b> (void)
+          <div>
+            Returns the sign of this integer.
+          </div>
+        </div>
+
+        <div class="funcdesc">
+          int <b>toInt</b> (void)
+          <div>
+            Returns the value represented by this integer or 0x80000000
+            if the value represented does not fit into a 32 bit signed int.
+          </div>
+        </div>
+
+        <div class="private">
+          <div class="funcdesc">
+            bool <b>absAdd</b> (Integer* <i>other</i>)
+            <div>
+              Adds the absolute value of <i>other</i> to the absolute value of this integer.
+              The <tt>absAdd</tt> function returns true if the result of the addition is
+              too large to be represented by this integer. The sign of this integer does not change.
+            </div>
+          </div>
+
+          <div class="funcdesc">
+            bool <b>absDec</b> (void)
+            <div>
+              Decreases the absolute value of this integer by one. If the result is zero,
+              the sign will always be false. This function always returns false.<br>
+              <b>Warning:</b> The <tt>absDec</tt> function may never be called
+              when the magnitude of this integer is zero.
+            </div>
+          </div>
+
+          <div class="funcdesc">
+            bool <b>absInc</b> (void)
+            <div>
+              Increases the absolute value of this integer by one. If the result is
+              too large to be represented by this integer, its value becomes 0 and
+              true is returned. The sign of this integer does not change.
+            </div>
+          </div>
+
+          <div class="funcdesc">
+            bool <b>absSub</b> (Integer* <i>other</i>)
+            <div>
+              Subtracts the absolute value of <i>other</i> from the absolute value of this integer. The
+              sign of this integer changes if the absolute value of <i>other</i> was larger than the
+              absolute value of this integer. The sign of this integer becomes false if both absolute
+              values were equal. The <tt>absSub</tt> function always returns false.
+            </div>
+          </div>
+
+          <div class="funcdesc">
+            void <b>lshl</b> (Integer* <i>incomingBits</i>, int <i>x</i>)
+            <div>
+            </div>
+          </div>
+
+          <div class="funcdesc">
+            void <b>rcl</b> (bool <i>carry</i>)
+            <div>
+            </div>
+          </div>
+
+          <div class="funcdesc">
+            void <b>setMax</b> (int <i>fromIndex</i>)
+            <div>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- Integer -->
+
+    </div>
+  </body>
+</html>

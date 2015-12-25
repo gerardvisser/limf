@@ -1,0 +1,37 @@
+#cache {
+    display: none;
+}
+#container {
+    height: 100%;
+    position: absolute;
+    width: 100%;
+}
+#index {
+    width: 200px;
+}
+body {
+    overflow-y: hidden;
+}
+div.bodyContents {
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 2px;
+}
+div.inlineblock {
+    border: 1px solid #000000;
+    display: inline-block;
+    overflow: scroll;
+}
+div.funcdesc > div {
+    margin-bottom: 7px;
+    margin-left: 40px;
+    margin-top: 7px;
+}
+div.link {
+    color: #0000FF;
+    padding-left: 5px;
+    padding-top: 2px;
+}
+div.private {
+    background-color: #C0C0C0;
+}

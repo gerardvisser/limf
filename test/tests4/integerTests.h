@@ -29,6 +29,7 @@ struct integerTestsStruct {
   void (* testToInt)(void);
   void (* testGetBit)(void);
   void (* testShl)(void);
+  void (* testShr)(void);
   /*
   void (* testAbsAdd)(void);
   void (* testAbsDec)(void);
@@ -36,7 +37,6 @@ struct integerTestsStruct {
   void (* testAbsSub)(void);
   void (* testLshl)(void);
   void (* testRcl)(void);
-  void (* testShr)(void);
   */
 };
 

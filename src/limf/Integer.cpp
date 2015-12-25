@@ -52,22 +52,238 @@ Integer::~Integer (void) {
 
 bool Integer::absAdd (Integer* other) {
   ___CBTPUSH;
+  validation_validateInteger (this, VALIDATION_BEFORE);
+  validation_validateInteger (other, VALIDATION_BEFORE);
+#ifdef DEBUG_MODE
+  if (m_size != other->m_size) {
+    errors_printMessageAndExit ("this->m_size should be equal to other->m_size.");
+  }
+#endif
+
+  bool otherMaxGreaterThanThisMax = other->m_max > m_max;
+  int max = otherMaxGreaterThanThisMax ? m_max : other->m_max;
+  bool carry = false;
+  int i;
+
+  for (i = 0; i < max; ++i) {
+    if (carry) {
+      m_buf[i - 1] &= CAL_LMASK[0];
+      ++m_buf[i];
+    }
+    m_buf[i] += other->m_buf[i];
+    carry = (m_buf[i] & CAL_SMASK[CAL_B]) != 0;
+  }
+
+  if (otherMaxGreaterThanThisMax) {
+
+    if (carry) {
+      m_buf[i - 1] &= CAL_LMASK[0];
+      while (i < other->m_max && other->m_buf[i] == CAL_LMASK[0]) {
+        ++i;
+      }
+      carry = i == m_size;
+      if (carry) {
+        setMax (m_max - 1);
+      } else {
+        m_buf[i] = other->m_buf[i] + 1;
+        ++i;
+        while (i < other->m_max) {
+          m_buf[i] = other->m_buf[i];
+          ++i;
+        }
+        m_max = i;
+      }
+    } else {
+      while (i < other->m_max) {
+        m_buf[i] = other->m_buf[i];
+        ++i;
+      }
+      m_max = i;
+    }
+
+  } else if (carry) {
+
+    m_buf[i - 1] &= CAL_LMASK[0];
+    while (i < m_max && m_buf[i] == CAL_LMASK[0]) {
+      m_buf[i] = 0;
+      ++i;
+    }
+    carry = i == m_size;
+    if (carry) {
+      setMax (other->m_max - 1);
+    } else {
+      ++m_buf[i];
+      if (i == m_max) {
+        ++m_max;
+      }
+    }
+
+  }
+
+  validation_validateInteger (this, VALIDATION_AFTER);
   ___CBTPOP;
+  return carry;
 }
 
 bool Integer::absDec (void) {
   ___CBTPUSH;
+  validation_validateInteger (this, VALIDATION_BEFORE);
+#ifdef DEBUG_MODE
+  if (m_max == 0) {
+    errors_printMessageAndExit ("This function may never be called when m_max is 0.");
+  }
+#endif
+
+  int i = 0;
+  while (m_buf[i] == 0) {
+    m_buf[i] = CAL_LMASK[0];
+    ++i;
+  }
+  --m_buf[i];
+  if (m_buf[i] == 0 && i == m_max - 1) {
+    --m_max;
+    if (m_max == 0) {
+      m_sign = false;
+    }
+  }
+
+  validation_validateInteger (this, VALIDATION_AFTER);
   ___CBTPOP;
+  return false;
 }
 
 bool Integer::absInc (void) {
   ___CBTPUSH;
+  validation_validateInteger (this, VALIDATION_BEFORE);
+
+  int i = 0;
+  while (i < m_size && m_buf[i] == CAL_LMASK[0]) {
+    m_buf[i] = 0;
+    ++i;
+  }
+  bool carry = i == m_size;
+  if (carry) {
+    m_max = 0;
+  } else {
+    ++m_buf[i];
+    if (i == m_max) {
+      ++m_max;
+    }
+  }
+
+  validation_validateInteger (this, VALIDATION_AFTER);
   ___CBTPOP;
+  return carry;
 }
 
 bool Integer::absSub (Integer* other) {
   ___CBTPUSH;
+  validation_validateInteger (this, VALIDATION_BEFORE);
+  validation_validateInteger (other, VALIDATION_BEFORE);
+#ifdef DEBUG_MODE
+  if (m_size != other->m_size) {
+    errors_printMessageAndExit ("this->m_size should be equal to other->m_size.");
+  }
+#endif
+
+  int i;
+  bool carry = false;
+
+  if (m_max > other->m_max) {
+
+    for (i = 0; i < other->m_max; ++i) {
+      if (carry) {
+        m_buf[i - 1] &= CAL_LMASK[0];
+        --m_buf[i];
+      }
+      m_buf[i] -= other->m_buf[i];
+      carry = (m_buf[i] & CAL_SMASK[CAL_B]) != 0;
+    }
+    if (carry) {
+      m_buf[i - 1] &= CAL_LMASK[0];
+      while (m_buf[i] == 0) {
+        m_buf[i] = CAL_LMASK[0];
+        ++i;
+      }
+      --m_buf[i];
+      if (i == m_max-1 && m_buf[i] == 0) {
+        setMax (i - 1);
+      }
+    }
+
+  } else if (m_max == other->m_max) {
+
+    for (i = 0; i < m_max; ++i) {
+      if (carry) {
+        m_buf[i - 1] &= CAL_LMASK[0];
+        --m_buf[i];
+      }
+      m_buf[i] -= other->m_buf[i];
+      carry = (m_buf[i] & CAL_SMASK[CAL_B]) != 0;
+    }
+    if (carry) {
+      i = 0;
+      m_sign = !m_sign;
+      while (m_buf[i] == 0) {
+        ++i;
+      }
+      m_buf[i] ^= CAL_LMASK[0];
+      m_buf[i] &= CAL_LMASK[0];
+      ++m_buf[i];
+      ++i;
+      while (i < m_max) {
+        m_buf[i] ^= CAL_LMASK[0];
+        m_buf[i] &= CAL_LMASK[0];
+        ++i;
+      }
+    }
+    setMax (i - 1);
+    if (m_max == 0) {
+      m_sign = false;
+    }
+
+  } else {
+
+    m_sign = !m_sign;
+    for (i = 0; i < m_max; ++i) {
+      if (carry) {
+        m_buf[i - 1] &= CAL_LMASK[0];
+        ++m_buf[i];
+      }
+      m_buf[i] = other->m_buf[i] - m_buf[i];
+      carry = (m_buf[i] & CAL_SMASK[CAL_B]) != 0;
+    }
+    m_max = other->m_max;
+    if (carry) {
+      m_buf[i - 1] &= CAL_LMASK[0];
+      while (other->m_buf[i] == 0) {
+        m_buf[i] = CAL_LMASK[0];
+        ++i;
+      }
+      m_buf[i] = other->m_buf[i] - 1;
+      if (i == other->m_max - 1) {
+        if (m_buf[i] == 0) {
+          setMax (i - 1);
+        }
+      } else {
+        ++i;
+        while (i < other->m_max) {
+          m_buf[i] = other->m_buf[i];
+          ++i;
+        }
+      }
+    } else {
+      while (i < other->m_max) {
+        m_buf[i] = other->m_buf[i];
+        ++i;
+      }
+    }
+
+  }
+
+  validation_validateInteger (this, VALIDATION_AFTER);
   ___CBTPOP;
+  return false;
 }
 
 int Integer::bsf (void) {
@@ -145,6 +361,131 @@ void Integer::lshl (Integer* incomingBits, int x) {
   ___CBTPUSH;
   validation_validateInteger (this, VALIDATION_BEFORE);
   validation_validateInteger (incomingBits, VALIDATION_BEFORE);
+#ifdef DEBUG_MODE
+  if (m_size != incomingBits->m_size) {
+    errors_printMessageAndExit ("m_size should be equal to incomingBits->m_size.");
+  }
+#endif
+
+  if (x > 0) {
+    const int n = m_size - 1;
+    const int q = x >> CAL_Q;
+    const int r = x & CAL_R;
+    int ih, il, zh, zl;
+
+    if (r > 0) {
+
+      const int k = CAL_B - r;
+      if (m_max > n - q) {
+        zh = n;
+      } else {
+        zh = q + m_max;
+      }
+
+      if (m_max > 0) {
+        for (ih = zh; ih > q; --ih) {
+          m_buf[ih] = m_buf[ih - q] << r;
+          m_buf[ih] |= m_buf[ih - q - 1] >> k;
+          m_buf[ih] &= CAL_RMASK[CAL_B];
+        }
+        m_buf[q] = m_buf[0] << r;
+        m_buf[q] &= CAL_RMASK[CAL_B];
+        --ih;
+      } else {
+        ih = -1;
+      }
+
+      if (incomingBits->m_max > 0) {
+
+        il = n;
+        m_buf[q] |= incomingBits->m_buf[n] >> k;
+        for (ih = q - 1; ih > -1; --ih) {
+          m_buf[ih] = incomingBits->m_buf[il] << r;
+          --il;
+          m_buf[ih] |= incomingBits->m_buf[il] >> k;
+          m_buf[ih] &= CAL_RMASK[CAL_B];
+        }
+
+        if (incomingBits->m_max > n - q) {
+          zl = n;
+        } else {
+          zl = q + incomingBits->m_max;
+        }
+        for (il = zl; il > q; --il) {
+          incomingBits->m_buf[il] = incomingBits->m_buf[il - q] << r;
+          incomingBits->m_buf[il] |= incomingBits->m_buf[il - q - 1] >> k;
+          incomingBits->m_buf[il] &= CAL_RMASK[CAL_B];
+        }
+        incomingBits->m_buf[q] = incomingBits->m_buf[0] << r;
+        incomingBits->m_buf[q] &= CAL_RMASK[CAL_B];
+        --il;
+
+        while (il > -1) {
+          incomingBits->m_buf[il] = 0;
+          --il;
+        }
+        incomingBits->setMax (zl);
+
+      } else {
+
+        while (ih > -1) {
+          m_buf[ih] = 0;
+          --ih;
+        }
+
+      }
+
+    } else { /* r = 0 */
+
+      if (m_max > 0) {
+        if (m_max > n - q) {
+          zh = n;
+        } else {
+          zh = q + m_max - 1;
+        }
+        for (ih = zh; ih >= q; --ih) {
+          m_buf[ih] = m_buf[ih - q];
+        }
+      } else {
+        ih = -1;
+        zh = q - 1;
+      }
+
+      if (incomingBits->m_max > 0) {
+
+        il = n;
+        for (ih = q - 1; ih > -1; --ih) {
+          m_buf[ih] = incomingBits->m_buf[il];
+          --il;
+        }
+
+        if (incomingBits->m_max > n - q) {
+          zl = n;
+        } else {
+          zl = q + incomingBits->m_max - 1;
+        }
+        for (il = zl; il >= q; --il) {
+          incomingBits->m_buf[il] = incomingBits->m_buf[il - q];
+        }
+
+        while (il > -1) {
+          incomingBits->m_buf[il] = 0;
+          --il;
+        }
+        incomingBits->setMax (zl);
+
+      } else {
+
+        while (ih > -1) {
+          m_buf[ih] = 0;
+          --ih;
+        }
+
+      }
+
+    }
+    setMax (zh);
+  }
 
   validation_validateInteger (incomingBits, VALIDATION_AFTER);
   validation_validateInteger (this, VALIDATION_AFTER);
@@ -153,7 +494,31 @@ void Integer::lshl (Integer* incomingBits, int x) {
 
 void Integer::rcl (bool carry) {
   ___CBTPUSH;
-  validation_validateInteger (this, VALIDATION_BEFORE);
+  validation_validateIntegerLast0 (this, VALIDATION_BEFORE);
+
+  if (m_max > 0) {
+
+    const int m = m_max - 1;
+    if ((m_buf[m] & CAL_SMASK[CAL_R]) != 0) {
+      m_buf[m_max] = 1;
+      ++m_max;
+    }
+    int i;
+    for (i = m; i > 0; --i) {
+      m_buf[i] <<= 1;
+      m_buf[i] &= CAL_LMASK[0];
+      m_buf[i] |= (m_buf[i - 1] & CAL_SMASK[CAL_R]) != 0;
+    }
+    m_buf[0] <<= 1;
+    m_buf[0] &= CAL_LMASK[0];
+    m_buf[0] |= carry;
+
+  } else if (carry) {
+
+    m_buf[0] = 1;
+    m_max = 1;
+
+  }
 
   validation_validateInteger (this, VALIDATION_AFTER);
   ___CBTPOP;
