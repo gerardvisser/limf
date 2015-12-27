@@ -103,6 +103,45 @@ static int64_t randomBits (int count) {
 
 static void testAbsAdd (void) {
   ___BTPUSH;
+
+  const int max = 4096;
+  Integer* bigintA = new Integer (7);
+  Integer* bigintB = new Integer (7);
+  ErrorExamples* errorExamples = new ErrorExamples ("Error for: bigintA = %ld (valA = 0x%07lX),  bigintB = %ld (valB = 0x%07lX)\n", 4);
+  progressionBar_init ("Integer::absAdd", 28 * 28 * max);
+  for (int i = 1; i <= 28; ++i) {
+    for (int j = 1; j <= 28; ++j) {
+      for (int k = 0; k < max; ++k) {
+        int64_t valA = randomBits (i);
+        int64_t valB = randomBits (j);
+        int64_t signA = valA != 0 ? RANDOM_BIT ? -1 : 1 : 1;
+        int64_t signB = RANDOM_BIT ? -1 : 1;
+        bigintA->set (signA * valA);
+        bigintB->set (signB * valB);
+
+        int64_t sum = valA + valB;
+        bool carryExpected = (sum & 0x10000000) != 0;
+        sum &= 0xFFFFFFF;
+        bool carry = bigintA->absAdd (bigintB);
+
+        bool error = bigintA->sign () != signA < 0;
+        error |= bigintB->toInt () != signB * valB;
+        error |= bigintA->toInt () != signA * sum;
+        error |= carry != carryExpected;
+
+        if (error) {
+          errorExamples->add (signA * valA, valA, signB * valB, valB);
+        }
+        progressionBar_update (error);
+      }
+    }
+  }
+  errorExamples->print ();
+
+  delete errorExamples;
+  delete bigintB;
+  delete bigintA;
+
   ___BTPOP;
 }
 
@@ -205,7 +244,7 @@ static void testGetBit (void) {
   int i;
   const int max = 0x10000;
   Integer* bigint = new Integer (15);
-  ErrorExamples* errorExamples = new ErrorExamples ("Error for: 0x%015lX, bitNo: %d\n", 2);
+  ErrorExamples* errorExamples = new ErrorExamples ("Error for: 0x%015lX, bitNo: %ld\n", 2);
   progressionBar_init ("Integer::getBit", max);
   for (i = 0; i < max; ++i) {
     int bitNo = rand () % 60;
@@ -308,7 +347,7 @@ static void testShl (void) {
   int i;
   const int max = 0x200000;
   Integer* bigint = new Integer (7);
-  ErrorExamples* errorExamples = new ErrorExamples ("Error for: 0x%07lX, bits to shift: %d\n", 2);
+  ErrorExamples* errorExamples = new ErrorExamples ("Error for: 0x%07lX, bits to shift: %ld\n", 2);
   progressionBar_init ("Integer::shl", max);
   for (i = 0; i < max; ++i) {
     int x = rand () % 29;
@@ -339,7 +378,7 @@ static void testShr (void) {
   int i;
   const int max = 0x200000;
   Integer* bigint = new Integer (7);
-  ErrorExamples* errorExamples = new ErrorExamples ("Error for: 0x%07lX, bits to shift: %d\n", 2);
+  ErrorExamples* errorExamples = new ErrorExamples ("Error for: 0x%07lX, bits to shift: %ld\n", 2);
   progressionBar_init ("Integer::shr", max);
   for (i = 0; i < max; ++i) {
     int x = rand () % 29;
@@ -420,5 +459,6 @@ const struct integerTestsStruct integerTests = {
   testToInt,
   testGetBit,
   testShl,
-  testShr
+  testShr,
+  testAbsAdd
 };

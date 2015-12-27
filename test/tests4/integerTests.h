@@ -30,8 +30,8 @@ struct integerTestsStruct {
   void (* testGetBit)(void);
   void (* testShl)(void);
   void (* testShr)(void);
-  /*
   void (* testAbsAdd)(void);
+  /*
   void (* testAbsDec)(void);
   void (* testAbsInc)(void);
   void (* testAbsSub)(void);
