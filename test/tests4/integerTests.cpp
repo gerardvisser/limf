@@ -157,6 +157,44 @@ static void testAbsInc (void) {
 
 static void testAbsSub (void) {
   ___BTPUSH;
+
+  const int max = 4096;
+  Integer* bigintA = new Integer (7);
+  Integer* bigintB = new Integer (7);
+  ErrorExamples* errorExamples = new ErrorExamples ("Error for: bigintA = %ld (valA = 0x%07lX),  bigintB = %ld (valB = 0x%07lX)\n", 4);
+  progressionBar_init ("Integer::absSub", 28 * 28 * max);
+  for (int i = 1; i <= 28; ++i) {
+    for (int j = 1; j <= 28; ++j) {
+      for (int k = 0; k < max; ++k) {
+        int64_t valA = randomBits (i);
+        int64_t valB = randomBits (j);
+        int64_t signA = valA != 0 ? RANDOM_BIT ? -1 : 1 : 1;
+        int64_t signB = RANDOM_BIT ? -1 : 1;
+        bigintA->set (signA * valA);
+        bigintB->set (signB * valB);
+
+        int64_t diff = valA - valB;
+        int signResult = diff <= 0 ? diff < 0 ? -signA : 1 : signA;
+        bool carry = bigintA->absSub (bigintB);
+
+        bool error = bigintA->sign () != signResult < 0;
+        error |= bigintB->toInt () != signB * valB;
+        error |= bigintA->toInt () != signA * diff;
+        error |= carry;
+
+        if (error) {
+          errorExamples->add (signA * valA, valA, signB * valB, valB);
+        }
+        progressionBar_update (error);
+      }
+    }
+  }
+  errorExamples->print ();
+
+  delete errorExamples;
+  delete bigintB;
+  delete bigintA;
+
   ___BTPOP;
 }
 
@@ -460,5 +498,6 @@ const struct integerTestsStruct integerTests = {
   testGetBit,
   testShl,
   testShr,
-  testAbsAdd
+  testAbsAdd,
+  testAbsSub
 };
