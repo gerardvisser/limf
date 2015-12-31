@@ -31,13 +31,11 @@ struct integerTestsStruct {
   void (* testShl)(void);
   void (* testShr)(void);
   void (* testAbsAdd)(void);
-  void (* testAbsSub)(void);
-  /*
   void (* testAbsDec)(void);
   void (* testAbsInc)(void);
+  void (* testAbsSub)(void);
   void (* testLshl)(void);
   void (* testRcl)(void);
-  */
 };
 
 extern const struct integerTestsStruct integerTests;

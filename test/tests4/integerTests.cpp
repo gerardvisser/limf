@@ -25,7 +25,9 @@
 #include <testutils/progressionBar.h>
 #include "integerTests.h"
 
-#define RANDOM_BIT (rand () / (RAND_MAX + 1.0) > 0.5)
+#define RANDOM_BIT        (RANDOM_DOUBLE > 0.5)
+#define RANDOM_DOUBLE     (rand () / (RAND_MAX + 1.0))
+#define RANDOM_INT(bound) ((int) (bound * RANDOM_DOUBLE))
 
 class TestInteger {
 private:
@@ -147,11 +149,65 @@ static void testAbsAdd (void) {
 
 static void testAbsDec (void) {
   ___BTPUSH;
+
+  int i;
+  const int max = 0xFFFF;
+  Integer* bigint = new Integer (4);
+  ErrorExamples* errorExamples = new ErrorExamples ("Error for: %ld\n", 1);
+  progressionBar_init ("Integer::absDec", max);
+  for (i = 1; i <= max; ++i) {
+    int64_t sign = RANDOM_BIT ? -1 : 1;
+    bigint->set (sign * i);
+
+    bool carry = bigint->absDec ();
+    int64_t expected = sign * (i - 1);
+
+    bool error = bigint->sign () != expected < 0;
+    error |= bigint->toInt () != expected;
+    error |= carry;
+
+    if (error) {
+      errorExamples->add (sign * i);
+    }
+    progressionBar_update (error);
+  }
+  errorExamples->print ();
+
+  delete errorExamples;
+  delete bigint;
+
   ___BTPOP;
 }
 
 static void testAbsInc (void) {
   ___BTPUSH;
+
+  int i;
+  const int max = 0x10000;
+  Integer* bigint = new Integer (4);
+  ErrorExamples* errorExamples = new ErrorExamples ("Error for: %ld\n", 1);
+  progressionBar_init ("Integer::absInc", max);
+  for (i = 0; i < max; ++i) {
+    int64_t sign = i != 0 ? RANDOM_BIT ? -1 : 1 : 1;
+    bigint->set (sign * i);
+
+    bool carry = bigint->absInc ();
+    int64_t expected = sign * (i + 1 & 0xFFFF);
+
+    bool error = bigint->sign () != sign < 0;
+    error |= bigint->toInt () != expected;
+    error |= carry != (i == 0xFFFF);
+
+    if (error) {
+      errorExamples->add (sign * i);
+    }
+    progressionBar_update (error);
+  }
+  errorExamples->print ();
+
+  delete errorExamples;
+  delete bigint;
+
   ___BTPOP;
 }
 
@@ -309,11 +365,69 @@ static void testGetBit (void) {
 
 static void testLshl (void) {
   ___BTPUSH;
+
+  int i;
+  const int max = 0x1800000;
+  Integer* bigintA = new Integer (5);
+  Integer* bigintB = new Integer (5);
+  ErrorExamples* errorExamples = new ErrorExamples ("Error for: bigintA = 0x%05lX,  bigintB = 0x%05lX, bits to shift: %ld\n", 3);
+  progressionBar_init ("Integer::lshl", max);
+  for (i = 0; i < max; ++i) {
+    int x = RANDOM_INT (20) + 1;
+    int64_t valA = RANDOM_INT (0x100000);
+    int64_t valB = RANDOM_INT (0x100000);
+    bigintA->set (valA);
+    bigintB->set (valB);
+
+    int64_t expected = valA << 20 | valB;
+    expected <<= x;
+    expected &= 0xFFFFFFFFFF;
+
+    bigintA->lshl (bigintB, x);
+    int64_t actual = (int64_t) bigintA->toInt () << 20 | bigintB->toInt ();
+
+    bool error = actual != expected;
+    if (error) {
+      errorExamples->add (valA, valB, (int64_t) x);
+    }
+    progressionBar_update (error);
+  }
+  errorExamples->print ();
+
+  delete errorExamples;
+  delete bigintB;
+  delete bigintA;
+
   ___BTPOP;
 }
 
 static void testRcl (void) {
   ___BTPUSH;
+
+  int i, carry;
+  const int max = 0x100000;
+  Integer* bigint = new Integer (5);
+  ErrorExamples* errorExamples = new ErrorExamples ("Error for: 0x%05lX, carry: %ld\n", 2);
+  progressionBar_init ("Integer::rcl", max);
+  for (carry = 0; carry < 2; ++carry) {
+    for (i = 0; i < 0x80000; ++i) {
+      bigint->set (i);
+
+      int expected = i << 1 | carry;
+      bigint->rcl (carry);
+
+      bool error = bigint->toInt () != expected;
+      if (error) {
+        errorExamples->add (i, (int64_t) carry);
+      }
+      progressionBar_update (error);
+    }
+  }
+  errorExamples->print ();
+
+  delete errorExamples;
+  delete bigint;
+
   ___BTPOP;
 }
 
@@ -499,5 +613,9 @@ const struct integerTestsStruct integerTests = {
   testShl,
   testShr,
   testAbsAdd,
-  testAbsSub
+  testAbsDec,
+  testAbsInc,
+  testAbsSub,
+  testLshl,
+  testRcl
 };
