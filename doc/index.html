@@ -93,7 +93,7 @@
         <div class="funcdesc">
           void <b>shr</b> (int <i>x</i>)
           <div>
-            Shift right. Shifts the bits of this integer x positions to the
+            Shift right. Shifts the bits of this integer <i>x</i> positions to the
             right; to put it differently: divides this integer by 2<sup>x</sup>.
           </div>
         </div>
@@ -155,12 +155,16 @@
           <div class="funcdesc">
             void <b>lshl</b> (Integer* <i>incomingBits</i>, int <i>x</i>)
             <div>
+              Shifts the bits of this integer and those of <i>incomingBits</i> <i>x</i> positions to the
+              left, where the <i>x</i> most significant bits of <i>incomingBits</i> are shifted into the
+              <i>x</i> least signifcant bits of this integer.
             </div>
           </div>
 
           <div class="funcdesc">
             void <b>rcl</b> (bool <i>carry</i>)
             <div>
+              Shifts the bits of this integer 1 position to the left and <i>carry</i> into the least significant bit.
             </div>
           </div>
 

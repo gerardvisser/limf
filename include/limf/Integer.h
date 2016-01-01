@@ -2,7 +2,7 @@
    Author:  Gerard Visser
    e-mail:  visser.gerard(at)gmail.com
 
-   Copyright (C) 2015 Gerard Visser.
+   Copyright (C) 2015, 2016 Gerard Visser.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,12 +26,10 @@ class Integer {
 private:
   uint64_t* m_buf;
   const int m_size;
-  const int m_bsize;
   int m_max;
   bool m_sign;
 
 public:
-  Integer (int size);
   ~Integer (void);
 
   int bsf (void);
@@ -52,6 +50,8 @@ public:
 #else
 private:
 #endif
+  Integer (int size);
+
   bool absAdd (Integer* other);
   bool absDec (void);
   bool absInc (void);

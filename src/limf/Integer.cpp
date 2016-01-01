@@ -2,7 +2,7 @@
    Author:  Gerard Visser
    e-mail:  visser.gerard(at)gmail.com
 
-   Copyright (C) 2015 Gerard Visser.
+   Copyright (C) 2015, 2016 Gerard Visser.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 
 ___CLASS (Integer)
 
-Integer::Integer (int size) : m_size (size), m_bsize (size << 3) , m_max (0), m_sign (false) {
+Integer::Integer (int size) : m_size (size), m_max (0), m_sign (false) {
   ___CBTPUSH;
 #ifdef DEBUG_MODE
   if (size < MIN_SIZE | size > MAX_SIZE) {
@@ -36,8 +36,9 @@ Integer::Integer (int size) : m_size (size), m_bsize (size << 3) , m_max (0), m_
   }
 #endif
 
-  m_buf = (uint64_t*) malloc (m_bsize);
-  memset (m_buf, 0, m_bsize);
+  int bsize = size << 3;
+  m_buf = (uint64_t*) malloc (bsize);
+  memset (m_buf, 0, bsize);
 
   ___CBTPOP;
 }
@@ -333,7 +334,7 @@ void Integer::clear (void) {
   ___CBTPUSH;
 
   validation_validateInteger (this, VALIDATION_BEFORE);
-  memset (m_buf, 0, m_bsize); /* Is dit goed genoeg? */
+  memset (m_buf, 0, m_size << 3); /* Is dit goed genoeg? */
   m_sign = false;
   m_max = 0;
 
