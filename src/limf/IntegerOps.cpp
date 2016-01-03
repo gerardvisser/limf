@@ -179,8 +179,42 @@ bool IntegerOps::add (Integer* dst, int value) {
   return carry;
 }
 
-void IntegerOps::baseDiv (Integer* result, Integer* denominator, int denomBsr, int total) {
+void IntegerOps::baseDiv (Integer* result, const Integer* denominator, int denomBsr, int total) {
   ___CBTPUSH;
+
+  const int integerWidthBits = m_size << CAL_Q; /* Hier een member van maken?  */
+
+  while (total > 0) {
+    int remainderBsr = m_remainder->bsr ();
+    if (remainderBsr == 0) {
+      int i = integerWidthBits - m_numerator->bsr ();
+      if (i > total) {
+        i = total;
+      }
+      result->lshl (m_numerator, i);
+      total -= i;
+    }
+    if (total > 0) {
+      int i;
+      if (remainderBsr < denomBsr) {
+        i = denomBsr - remainderBsr;
+      } else {
+        i = 1;
+      }
+      if (i <= total) {
+        result->shl (i - 1);
+        m_remainder->lshl (m_numerator, i);
+        bool carry = subtractFromRemainder (denominator, denomBsr, remainderBsr + i);
+        result->rcl (carry);
+        total -= i;
+      } else {
+        result->shl (total);
+        m_remainder->lshl (m_numerator, total);
+        total = 0;
+      }
+    }
+  }
+
   ___CBTPOP;
 }
 
@@ -298,7 +332,72 @@ bool IntegerOps::sub (Integer* dst, Integer* src) {
   return carry;
 }
 
-bool IntegerOps::subtractFromRemainder (Integer* denominator, int denomBsr, int remainderBsr) {
+/* Precondition: denomBsr ≤ remainderBsr < denomBsr + 2.  */
+bool IntegerOps::subtractFromRemainder (const Integer* denominator, int denomBsr, int remainderBsr) {
   ___CBTPUSH;
+  validation_validateIntegerLast0 (denominator, VALIDATION_BEFORE);
+  validation_validateInteger (m_remainder, VALIDATION_BEFORE);
+  validation_validateInteger (m_aux, VALIDATION_BEFORE);
+#ifdef DEBUG_MODE
+  if (denomBsr != denominator->bsr ()) {
+    errors_printMessageAndExit ("denomBsr != denominator->bsr ().");
+  }
+  if (remainderBsr != m_remainder->bsr ()) {
+    errors_printMessageAndExit ("remainderBsr != m_remainder->bsr ().");
+  }
+  if (!(remainderBsr == denomBsr | remainderBsr == denomBsr + 1)) {
+    errors_printMessageAndExit ("!(remainderBsr == denomBsr | remainderBsr == denomBsr + 1).");
+  }
+#endif
+
+  int i;
+  bool carry = false;
+  if (denomBsr == remainderBsr) {
+
+    for (i = 0; i < denominator->m_max; ++i) {
+      m_aux->m_buf[i] = m_remainder->m_buf[i];
+      if (carry) {
+        m_remainder->m_buf[i - 1] &= CAL_LMASK[0];
+        --m_remainder->m_buf[i];
+      }
+      m_remainder->m_buf[i] -= denominator->m_buf[i];
+      carry = (m_remainder->m_buf[i] & CAL_SMASK[CAL_B]) != 0;
+    }
+    if (m_aux->m_max < denominator->m_max) {
+      m_aux->m_max = denominator->m_max;
+    }
+    if (carry) {
+      /* Misschien sneller met memcpy */
+      for (i = 0; i < denominator->m_max; ++i) {
+        m_remainder->m_buf[i] = m_aux->m_buf[i];
+      }
+    } else {
+      m_remainder->setMax (i - 1);
+    }
+    carry = !carry;
+
+  } else {
+
+    for (i = 0; i < denominator->m_max; ++i) {
+      if (carry) {
+        m_remainder->m_buf[i - 1] &= CAL_LMASK[0];
+        --m_remainder->m_buf[i];
+      }
+      m_remainder->m_buf[i] -= denominator->m_buf[i];
+      carry = (m_remainder->m_buf[i] & CAL_SMASK[CAL_B]) != 0;
+    }
+    if (carry) {
+        m_remainder->m_buf[i - 1] &= CAL_LMASK[0];
+        m_remainder->m_buf[i] = 0;
+    } else {
+      carry = true;
+    }
+    m_remainder->setMax (i - 1);
+
+  }
+
+  validation_validateIntegerLast0 (m_remainder, VALIDATION_AFTER);
+  validation_validateInteger (m_aux, VALIDATION_AFTER);
   ___CBTPOP;
+  return carry;
 }

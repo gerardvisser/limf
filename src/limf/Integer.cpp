@@ -287,7 +287,7 @@ bool Integer::absSub (Integer* other) {
   return false;
 }
 
-int Integer::bsf (void) {
+int Integer::bsf (void) const {
   ___CBTPUSH;
 
   validation_validateInteger (this, VALIDATION_BEFORE);
@@ -309,7 +309,7 @@ int Integer::bsf (void) {
   return result;
 }
 
-int Integer::bsr (void) {
+int Integer::bsr (void) const {
   ___CBTPUSH;
 
   int result;
@@ -341,7 +341,7 @@ void Integer::clear (void) {
   ___CBTPOP;
 }
 
-bool Integer::getBit (int bitNo) {
+bool Integer::getBit (int bitNo) const {
   ___CBTPUSH;
   validation_validateInteger (this, VALIDATION_BEFORE);
 
@@ -696,11 +696,11 @@ void Integer::shr (int x) {
   ___CBTPOP;
 }
 
-bool Integer::sign (void) {
+bool Integer::sign (void) const {
   return m_sign;
 }
 
-int Integer::toInt (void) {
+int Integer::toInt (void) const {
   ___CBTPUSH;
   validation_validateInteger (this, VALIDATION_BEFORE);
   int result;
@@ -735,15 +735,15 @@ int Integer::toInt (void) {
 
 #ifdef DEBUG_MODE
 
-const uint64_t* Integer::buf (void) {
+const uint64_t* Integer::buf (void) const {
   return m_buf;
 }
 
-int Integer::max (void) {
+int Integer::max (void) const {
   return m_max;
 }
 
-int Integer::size (void) {
+int Integer::size (void) const {
   return m_size;
 }
 

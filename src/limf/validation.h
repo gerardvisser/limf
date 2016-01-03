@@ -2,7 +2,7 @@
    Author:  Gerard Visser
    e-mail:  visser.gerard(at)gmail.com
 
-   Copyright (C) 2015 Gerard Visser.
+   Copyright (C) 2015, 2016 Gerard Visser.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@
 # define VALIDATION_AFTER  1
 # define VALIDATION_BEFORE 2
 
-void validation_validateInteger (Integer* src, const char* argName, int beforeOrAfter);
-void validation_validateIntegerLast0 (Integer* src, const char* argName, int beforeOrAfter);
+void validation_validateInteger (const Integer* src, const char* argName, int beforeOrAfter);
+void validation_validateIntegerLast0 (const Integer* src, const char* argName, int beforeOrAfter);
 
 # define validation_validateInteger(src, beforeOrAfter)      validation_validateInteger (src, #src, beforeOrAfter)
 # define validation_validateIntegerLast0(src, beforeOrAfter) validation_validateIntegerLast0 (src, #src, beforeOrAfter)

@@ -30,23 +30,23 @@ private:
   bool m_sign;
 
 public:
-  ~Integer (void);
+  virtual ~Integer (void);
 
-  int bsf (void);
-  int bsr (void);
+  int bsf (void) const;
+  int bsr (void) const;
   void clear (void);
-  bool getBit (int bitNo);
+  bool getBit (int bitNo) const;
   void set (Integer* other);
   void set (int64_t val);
   void shl (int x);
   void shr (int x);
-  bool sign (void);
-  int toInt (void);
+  bool sign (void) const;
+  int toInt (void) const;
 
 #ifdef DEBUG_MODE
-  const uint64_t* buf (void);
-  int max (void);
-  int size (void);
+  const uint64_t* buf (void) const;
+  int max (void) const;
+  int size (void) const;
 #else
 private:
 #endif

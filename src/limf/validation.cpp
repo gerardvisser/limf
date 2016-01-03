@@ -2,7 +2,7 @@
    Author:  Gerard Visser
    e-mail:  visser.gerard(at)gmail.com
 
-   Copyright (C) 2015 Gerard Visser.
+   Copyright (C) 2015, 2016 Gerard Visser.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #undef validation_validateIntegerLast0
 #undef validation_validateInteger
 
-void validation_validateInteger (Integer* src, const char* argName, int beforeOrAfter) {
+void validation_validateInteger (const Integer* src, const char* argName, int beforeOrAfter) {
   ___BTPUSH;
 
   const uint64_t* srcbuf = src->buf ();
@@ -53,7 +53,7 @@ void validation_validateInteger (Integer* src, const char* argName, int beforeOr
   ___BTPOP;
 }
 
-void validation_validateIntegerLast0 (Integer* src, const char* argName, int beforeOrAfter) {
+void validation_validateIntegerLast0 (const Integer* src, const char* argName, int beforeOrAfter) {
   ___BTPUSH;
 
   const uint64_t* srcbuf = src->buf ();

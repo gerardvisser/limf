@@ -32,7 +32,7 @@ private:
 
 public:
   IntegerOps (int size);
-  ~IntegerOps (void);
+  virtual ~IntegerOps (void);
 
   bool add (Integer* dst, Integer* src);
   bool add (Integer* dst, int value);
@@ -44,9 +44,9 @@ public:
   bool sub (Integer* dst, Integer* src);
 
 private:
-  void baseDiv (Integer* result, Integer* denominator, int denomBsr, int total);
+  void baseDiv (Integer* result, const Integer* denominator, int denomBsr, int total);
   void baseMul (Integer* srcA, Integer* srcB);
-  bool subtractFromRemainder (Integer* denominator, int denomBsr, int remainderBsr);
+  bool subtractFromRemainder (const Integer* denominator, int denomBsr, int remainderBsr);
 };
 
 #endif
